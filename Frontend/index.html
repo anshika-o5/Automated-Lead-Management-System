@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Customer Enquiry</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f6f4;
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    form {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: min(350px, 85vw);
+      box-shadow: 0 4px 20px #0001;
+    }
+    h2 { color: #245c46; }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background: #245c46;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.6; }
+    #status { font-size: 14px; }
+  </style>
+</head>
+<body>
+  <form id="enquiryForm">
+    <h2>Get in Touch</h2>
+    <p>Tell us about your project.</p>
+
+    <input name="name" placeholder="Your Name" required>
+
+    <input name="email" type="email"
+           placeholder="Email Address" required>
+
+    <select name="service" required>
+      <option value="">Select a Service</option>
+      <option>Website Development</option>
+      <option>Mobile App Development</option>
+      <option>API Integration</option>
+    </select>
+
+    <input name="budget" type="number"
+           min="1" placeholder="Budget (USD)" required>
+
+    <button type="submit">Submit Enquiry</button>
+    <p id="status" role="status"></p>
+  </form>
+
+  <script>
+    const form = document.getElementById("enquiryForm");
+    const status = document.getElementById("status");
+    const button = form.querySelector("button");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const data = Object.fromEntries(new FormData(form));
+      data.name = data.name.trim();
+      data.email = data.email.trim();
+      data.budget = Number(data.budget);
+
+      if (!data.name || !data.email ||
+          !data.service || !Number.isFinite(data.budget) ||
+          data.budget <= 0) {
+        status.textContent = "Please enter valid details.";
+        return;
+      }
+
+      button.disabled = true;
+      status.textContent = "Submitting...";
+
+      try {
+        const response = await fetch(
+          "http://localhost:5678/webhook-test/customer-enquiry",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+          }
+        );
+
+        if (!response.ok) throw new Error("Request failed");
+
+        status.textContent = "Enquiry submitted successfully!";
+        form.reset();
+      } catch (error) {
+        status.textContent = "Submission failed. Please try again.";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
+

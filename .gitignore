@@ -1,0 +1,15 @@
+# Private backups
+*.tar
+*.tar.gz
+*.zip
+
+# Credentials and environment files
+.env
+.env.*
+credentials.json
+client_secret*.json
+
+# Python
+__pycache__/
+venv/
+.venv/
